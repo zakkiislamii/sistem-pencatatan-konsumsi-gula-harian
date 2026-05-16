@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalContent = document.getElementById('consumption-modal-content');
     const body = document.getElementById('consumption-modal-body');
 
+    const originalFormHTML = body.innerHTML;
+
     function showModal() {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -31,6 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (openAdd) {
         openAdd.addEventListener('click', function (e) {
             e.preventDefault();
+            body.innerHTML = originalFormHTML;
+            attachCancelListener();
             showModal();
         });
     }
@@ -68,10 +72,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('consumption-modal-overlay');
     if (overlay) overlay.addEventListener('click', hideModal);
 
-    // Cancel listener awal untuk form Tambah
+    // Cancel listener awal
     attachCancelListener();
 
-    // Delete handling: modal confirm + AJAX
+    // Delete handling
     const confirmModal = document.getElementById('confirm-delete-modal');
     const confirmCancelBtn = document.getElementById('confirm-delete-cancel');
     const confirmYesBtn = document.getElementById('confirm-delete-yes');
@@ -99,13 +103,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', function () {
-        pendingDelete.id = null; pendingDelete.li = null; hideConfirmModal();
+        pendingDelete.id = null;
+        pendingDelete.li = null;
+        hideConfirmModal();
     });
 
     if (confirmYesBtn) confirmYesBtn.addEventListener('click', function () {
         if (!pendingDelete.id) return;
 
-        // read CSRF header/token from meta
         const headerMeta = document.querySelector('meta[name="_csrf_header"]');
         const tokenMeta = document.querySelector('meta[name="_csrf"]');
         const headers = {
@@ -116,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
             headers[headerMeta.getAttribute('content')] = tokenMeta.getAttribute('content');
         }
 
-        // capture amount before removing element
         let amount = 0;
         if (pendingDelete.li) {
             const amtSpan = pendingDelete.li.querySelector('.bg-green-50 span');
@@ -132,16 +136,14 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(resp => {
             if (!resp.ok) throw resp;
-            // remove item from DOM
-            if (pendingDelete.li && pendingDelete.li.parentNode) pendingDelete.li.parentNode.removeChild(pendingDelete.li);
+            if (pendingDelete.li && pendingDelete.li.parentNode) {
+                pendingDelete.li.parentNode.removeChild(pendingDelete.li);
+            }
 
-            // update daily total & status
             const dailyTotalEl = document.getElementById('daily-total');
             const statusEl = document.getElementById('daily-status');
             let current = parseFloat(dailyTotalEl.textContent) || 0;
-            let newTotal = current - amount;
-            if (newTotal < 0) newTotal = 0;
-            // format: remove trailing zeros when integer
+            let newTotal = Math.max(0, current - amount);
             dailyTotalEl.textContent = (Math.round(newTotal * 100) / 100).toString();
 
             if (statusEl) {
@@ -155,13 +157,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            pendingDelete.id = null; pendingDelete.li = null;
+            pendingDelete.id = null;
+            pendingDelete.li = null;
             hideConfirmModal();
         })
         .catch(err => {
             console.error('Failed to delete', err);
             alert('Gagal menghapus data');
-            pendingDelete.id = null; pendingDelete.li = null;
+            pendingDelete.id = null;
+            pendingDelete.li = null;
             hideConfirmModal();
         });
     });
