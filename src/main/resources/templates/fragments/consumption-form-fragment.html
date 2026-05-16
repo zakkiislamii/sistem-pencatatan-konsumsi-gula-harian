@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="consumptionForm">
+        <div class="w-full bg-white/95 backdrop-blur-2xl p-8 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] border border-white">
+            
+            <div class="mb-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+                <h2 class="text-2xl font-serif font-bold text-slate-900"
+                    th:text="${sugarForm.consumptionId == null ? 'Tambah Konsumsi' : 'Edit Konsumsi'}">Form</h2>
+                <button type="button"
+                        class="text-slate-400 hover:text-slate-700 transition-colors"
+                        onclick="document.getElementById('consumption-cancel').click()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form th:action="${sugarForm.consumptionId == null} ? @{/consumption/add} : @{/consumption/{id}/edit(id=${sugarForm.consumptionId})}"
+                  th:object="${sugarForm}"
+                  method="post"
+                  class="flex flex-col gap-5">
+
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:field="*{consumptionId}" />
+
+                <!-- Jumlah Gula -->
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-sm font-bold text-slate-700">Jumlah Gula (gram)</span>
+                    <input type="number"
+                           step="0.01"
+                           min="0"
+                           th:field="*{amount}"
+                           placeholder="Contoh: 15.5"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all" />
+                    <p class="text-red-600 font-semibold text-xs mt-1 empty:hidden"
+                       th:if="${#fields.hasErrors('amount')}"
+                       th:errors="*{amount}"></p>
+                </label>
+
+                <!-- Deskripsi -->
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-sm font-bold text-slate-700">Deskripsi / Nama Minuman</span>
+                    <textarea th:field="*{description}"
+                              placeholder="Contoh: Kopi Susu Aren"
+                              rows="2"
+                              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all resize-none"></textarea>
+                    <p class="text-red-600 font-semibold text-xs mt-1 empty:hidden"
+                       th:if="${#fields.hasErrors('description')}"
+                       th:errors="*{description}"></p>
+                </label>
+
+                <!-- Tanggal & Waktu -->
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-sm font-bold text-slate-700">Tanggal &amp; Waktu</span>
+                    <input type="datetime-local"
+                           id="consumedAt"
+                           name="consumedAt"
+                           th:value="${sugarForm.consumedAt != null ?
+                               #temporals.format(sugarForm.consumedAt, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all" />
+                    <p class="text-red-600 font-semibold text-xs mt-1 empty:hidden"
+                       th:if="${#fields.hasErrors('consumedAt')}"
+                       th:errors="*{consumedAt}"></p>
+                </label>
+
+                <!-- Global errors -->
+                <div class="bg-red-50 text-red-700 px-4 py-3 rounded-xl text-sm font-bold empty:hidden"
+                     th:if="${#fields.hasGlobalErrors()}">
+                    <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                </div>
+
+                <!-- Tombol -->
+                <div class="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
+                    <button type="button"
+                            id="consumption-cancel"
+                            class="flex-1 px-4 py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-[2] bg-gradient-to-br from-green-600 to-green-800 text-white px-4 py-3.5 font-bold rounded-xl shadow-lg shadow-green-900/20 hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                        Simpan Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
