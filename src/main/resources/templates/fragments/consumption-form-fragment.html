@@ -32,6 +32,7 @@
                            min="0"
                            th:field="*{amount}"
                            placeholder="Contoh: 15.5"
+                           required
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all" />
                     <p class="text-red-600 font-semibold text-xs mt-1 empty:hidden"
                        th:if="${#fields.hasErrors('amount')}"
@@ -44,6 +45,7 @@
                     <textarea th:field="*{description}"
                               placeholder="Contoh: Kopi Susu Aren"
                               rows="2"
+                              required
                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all resize-none"></textarea>
                     <p class="text-red-600 font-semibold text-xs mt-1 empty:hidden"
                        th:if="${#fields.hasErrors('description')}"
