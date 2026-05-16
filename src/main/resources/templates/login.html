@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Sistem Pencatatan Gula Harian</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['Fraunces', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-50 min-h-screen flex items-center justify-center p-4 md:p-8 relative font-sans text-slate-800 overflow-x-hidden">
+    <!-- Background Gradient Ornaments -->
+    <div class="absolute top-0 left-0 w-[40rem] h-[40rem] bg-green-700/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+    <div class="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-amber-600/10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+
+    <main class="w-full max-w-5xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-3 md:p-5 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4 relative z-10">
+        
+        <!-- Hero Panel -->
+        <section class="relative bg-gradient-to-br from-green-900 to-green-700 rounded-[2rem] p-8 md:p-12 flex flex-col justify-end text-white overflow-hidden min-h-[300px] lg:min-h-[600px]">
+            <!-- Decorative circle -->
+            <div class="absolute -bottom-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
+            <div class="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
+            
+            <div class="relative z-10">
+                <p class="uppercase tracking-widest text-xs font-extrabold text-green-200/80 mb-4">Sistem Pencatatan Gula Harian</p>
+                <h1 class="font-serif text-4xl md:text-5xl leading-tight mb-4">Masuk untuk melihat dashboard dan data harian.</h1>
+                <p class="text-green-100/80 font-medium">Akses halaman utama hanya tersedia setelah login.</p>
+            </div>
+        </section>
+
+        <!-- Form Panel -->
+        <section class="p-6 md:p-10 flex flex-col justify-center">
+            <div class="mb-8">
+                <h2 class="font-serif text-3xl font-bold text-slate-900 mb-2">Login</h2>
+                <p class="text-slate-500 font-medium">Gunakan username dan password yang sudah terdaftar.</p>
+            </div>
+
+            <!-- Alerts -->
+            <div class="bg-green-50 text-green-700 border border-green-200 rounded-2xl p-4 font-bold mb-6 text-sm" th:if="${param.logout}">Anda telah logout.</div>
+            <div class="bg-green-50 text-green-700 border border-green-200 rounded-2xl p-4 font-bold mb-6 text-sm" th:if="${registerSuccess}" th:text="${registerSuccess}"></div>
+            <div class="bg-red-50 text-red-700 border border-red-200 rounded-2xl p-4 font-bold mb-6 text-sm" th:if="${param.error}">Username atau password salah.</div>
+
+            <form class="flex flex-col gap-5" th:action="@{/login}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-bold text-slate-700">Username</span>
+                    <input type="text" name="username" placeholder="Masukkan username" required 
+                           class="w-full bg-white/80 border border-slate-200 rounded-2xl px-4 py-3.5 font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all shadow-sm">
+                </label>
+
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-bold text-slate-700">Password</span>
+                    <input type="password" name="password" placeholder="Masukkan password" required 
+                           class="w-full bg-white/80 border border-slate-200 rounded-2xl px-4 py-3.5 font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all shadow-sm">
+                </label>
+
+                <button type="submit" class="mt-2 w-full bg-gradient-to-br from-green-700 to-green-900 text-white font-bold rounded-2xl px-6 py-4 shadow-lg shadow-green-900/20 hover:shadow-xl hover:shadow-green-900/40 hover:-translate-y-0.5 transition-all">
+                    Masuk
+                </button>
+            </form>
+
+            <p class="mt-8 text-center text-slate-500 font-medium">
+                Belum punya akun? <a th:href="@{/register}" class="text-green-700 font-bold hover:text-green-800 transition-colors">Daftar di sini</a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>
