@@ -18,6 +18,8 @@
             }
         }
     </script>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
 <body class="bg-stone-50 min-h-screen p-4 md:p-8 relative font-sans text-slate-800 overflow-x-hidden">
 
@@ -33,6 +35,19 @@
                 <h1 class="font-serif text-3xl md:text-4xl text-slate-900 m-0">
                     Halo, <span th:text="${name}" class="text-green-700">User</span>
                 </h1>
+            </div>
+
+            <!-- Confirm Delete Modal -->
+            <div id="confirm-delete-modal" class="fixed inset-0 hidden items-center justify-center z-50">
+                <div id="confirm-delete-overlay" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+                <div class="relative z-10 w-full max-w-md p-6 bg-white rounded-2xl shadow-lg">
+                    <h3 class="text-lg font-bold mb-2">Konfirmasi Hapus</h3>
+                    <p class="text-sm text-slate-600 mb-4">Apakah Anda yakin ingin menghapus catatan konsumsi ini?</p>
+                    <div class="flex justify-end gap-3">
+                        <button id="confirm-delete-cancel" type="button" class="px-4 py-2 bg-white border rounded-xl">Batal</button>
+                        <button id="confirm-delete-yes" type="button" class="px-4 py-2 bg-red-600 text-white rounded-xl">Hapus</button>
+                    </div>
+                </div>
             </div>
             
             <form th:action="@{/logout}" method="post">
@@ -71,11 +86,23 @@
                     <form th:action="@{/dashboard}" method="get" class="flex items-center gap-2 bg-white/80 p-1.5 rounded-2xl border border-slate-200 shadow-sm">
                         <input type="date" name="date"
                                class="bg-transparent border-none px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-0"
-                               th:value="${selectedDate}" />
+                               th:value="${selectedDate}"
+                               th:attr="max=${maxDate}" />
                         <button type="submit" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold rounded-xl transition-colors">
                             Lihat Tanggal
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-6">
+                <div class="text-sm text-slate-600">Total gula hari ini:</div>
+                <div class="font-bold text-lg text-slate-900">
+                    <span id="daily-total" th:text="${dailyTotal != null ? dailyTotal : 0}">0</span> gram
+                </div>
+                <div id="daily-status" class="px-3 py-1 rounded-lg text-sm font-semibold"
+                     th:classappend="${dailyStatus == 'normal'} ? ' bg-green-100 text-green-700' : ' bg-red-100 text-red-700'">
+                    <span th:text="${dailyStatus != null ? dailyStatus : 'normal'}">normal</span>
                 </div>
             </div>
 
@@ -109,12 +136,17 @@
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div class="flex items-center gap-2">
                         <a href="#"
-                        th:attr="data-id=${c.consumptionId}"
-                        class="consumption-edit px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-bold rounded-xl border border-slate-200 transition-all">
-                        Edit
+                           th:attr="data-id=${c.consumptionId}"
+                           class="consumption-edit px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-bold rounded-xl border border-slate-200 transition-all">
+                            Edit
                         </a>
+                        <button type="button"
+                                th:attr="data-id=${c.consumptionId}"
+                                class="consumption-delete px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-sm font-bold rounded-xl border border-red-100 transition-all">
+                            Hapus
+                        </button>
                     </div>
                 </li>
             </ul>

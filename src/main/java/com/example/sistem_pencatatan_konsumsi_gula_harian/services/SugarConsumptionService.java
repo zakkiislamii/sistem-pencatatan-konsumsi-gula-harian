@@ -64,6 +64,26 @@ public class SugarConsumptionService {
         return repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(user, start, end);
     }
 
+    public BigDecimal getTotalForDate(User user, LocalDate date) {
+        List<SugarConsumption> list = getConsumptionsForDate(user, date);
+        if (list == null || list.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return list.stream()
+                .map(SugarConsumption::getAmount)
+                .filter(a -> a != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Transactional
+    public void deleteConsumptionForUser(Integer id, User user) {
+        Optional<SugarConsumption> opt = repository.findByConsumptionIdAndUser(id, user);
+        if (opt.isEmpty()) {
+            throw new IllegalArgumentException("Data tidak ditemukan");
+        }
+        repository.delete(opt.get());
+    }
+
     private void validateForm(SugarConsumptionForm form) {
         if (form.getAmount() == null) {
             throw new IllegalArgumentException("Jumlah konsumsi wajib diisi");

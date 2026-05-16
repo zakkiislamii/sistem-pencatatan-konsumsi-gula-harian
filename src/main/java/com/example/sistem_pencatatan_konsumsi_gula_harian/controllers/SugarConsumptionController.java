@@ -1,7 +1,11 @@
 package com.example.sistem_pencatatan_konsumsi_gula_harian.controllers;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -107,6 +111,25 @@ public class SugarConsumptionController {
                 sc.getDescription(),
                 sc.getConsumedAt());
         model.addAttribute("sugarForm", form);
+        model.addAttribute("maxDateTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
         return "fragments/consumption-form-fragment :: consumptionForm";
+    }
+
+    @PostMapping("/consumption/{id}/delete")
+    public ResponseEntity<?> deleteConsumption(
+            @PathVariable Integer id,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.getUserByUsername(authentication.getName());
+        try {
+            consumptionService.deleteConsumptionForUser(id, user);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
     }
 }
