@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.DailyConsumptionD
 import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.SugarConsumptionForm;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.entities.SugarConsumption;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.entities.User;
+import com.example.sistem_pencatatan_konsumsi_gula_harian.enums.ConsumptionStatus;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.repositories.SugarConsumptionRepository;
 
 @Service
@@ -29,7 +31,18 @@ public class SugarConsumptionService {
 
     @Transactional
     public SugarConsumption addConsumption(SugarConsumptionForm form, User user) {
-        validateForm(form);
+        if (form.getAmount() == null) {
+            throw new IllegalArgumentException("Jumlah konsumsi wajib diisi");
+        }
+        if (form.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Jumlah harus >= 0");
+        }
+        if (form.getConsumedAt() == null) {
+            throw new IllegalArgumentException("Tanggal dan waktu konsumsi wajib diisi");
+        }
+        if (form.getConsumedAt().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Tanggal tidak boleh di masa depan");
+        }
 
         SugarConsumption sc = new SugarConsumption();
         sc.setAmount(form.getAmount());
@@ -42,7 +55,18 @@ public class SugarConsumptionService {
 
     @Transactional
     public SugarConsumption updateConsumption(Integer id, SugarConsumptionForm form, User user) {
-        validateForm(form);
+        if (form.getAmount() == null) {
+            throw new IllegalArgumentException("Jumlah konsumsi wajib diisi");
+        }
+        if (form.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Jumlah harus >= 0");
+        }
+        if (form.getConsumedAt() == null) {
+            throw new IllegalArgumentException("Tanggal dan waktu konsumsi wajib diisi");
+        }
+        if (form.getConsumedAt().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Tanggal tidak boleh di masa depan");
+        }
 
         Optional<SugarConsumption> opt = repository.findByConsumptionIdAndUser(id, user);
         if (opt.isEmpty()) {
@@ -57,23 +81,17 @@ public class SugarConsumptionService {
         return repository.save(sc);
     }
 
-    public Optional<SugarConsumption> findByIdForUser(Integer id, User user) {
-        return repository.findByConsumptionIdAndUser(id, user);
-    }
-
     public DailyConsumptionDetail getDetailConsumption(User user, LocalDate date) {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
         List<SugarConsumption> consumptions = repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(user, start, end);
         BigDecimal dailyTotal = consumptions.stream()
                 .map(SugarConsumption::getAmount)
-                .filter(a -> a != null)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        String dailyStatus = dailyTotal.compareTo(DAILY_LIMIT) <= 0
-                ? "normal"
-                : "melebihi batas konsumsi";
-
+        ConsumptionStatus dailyStatus = dailyTotal.compareTo(DAILY_LIMIT) <= 0
+                ? ConsumptionStatus.NORMAL
+                : ConsumptionStatus.MELEBIHI_BATAS;
         return new DailyConsumptionDetail(consumptions, dailyTotal, dailyStatus);
     }
 
@@ -86,18 +104,7 @@ public class SugarConsumptionService {
         repository.delete(opt.get());
     }
 
-    private void validateForm(SugarConsumptionForm form) {
-        if (form.getAmount() == null) {
-            throw new IllegalArgumentException("Jumlah konsumsi wajib diisi");
-        }
-        if (form.getAmount().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Jumlah harus >= 0");
-        }
-        if (form.getConsumedAt() == null) {
-            throw new IllegalArgumentException("Tanggal dan waktu konsumsi wajib diisi");
-        }
-        if (form.getConsumedAt().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Tanggal tidak boleh di masa depan");
-        }
+    public Optional<SugarConsumption> findByIdForUser(Integer id, User user) {
+        return repository.findByConsumptionIdAndUser(id, user);
     }
 }

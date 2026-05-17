@@ -59,6 +59,7 @@
                            id="consumedAt"
                            name="consumedAt"
                            th:attr="max=${maxDateTime}"
+                           required
                            th:value="${sugarForm.consumedAt != null ?
                                #temporals.format(sugarForm.consumedAt, 'yyyy-MM-dd''T''HH:mm') : ''}"
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-4 focus:ring-green-600/15 focus:border-green-600 transition-all" />

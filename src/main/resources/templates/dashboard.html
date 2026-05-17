@@ -88,8 +88,7 @@
             <!-- Section Header & Filter -->
             <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
                 <div>
-                    <h3 class="font-serif text-3xl font-bold text-slate-900">Riwayat Konsumsi</h3>
-                    <p class="text-slate-500 text-sm font-medium mt-1">Pantau asupan gula harianmu untuk hidup lebih sehat.</p>
+                    <h3 class="font-serif text-xl font-bold text-slate-900">Pantau asupan gula harianmu untuk hidup lebih sehat.</h3>
                 </div>
                 <form th:action="@{/dashboard}" method="get" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div class="relative bg-white/80 p-1.5 rounded-2xl border border-slate-200 shadow-sm flex items-center focus-within:ring-2 focus-within:ring-green-600/20 focus-within:border-green-600 transition-all">
@@ -120,12 +119,12 @@
                 <div class="relative z-10 flex flex-col items-start md:items-end gap-2">
                     <div class="text-slate-400 font-bold uppercase tracking-wider text-xs">Status Batas Harian</div>
                     <div id="daily-status" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-wide backdrop-blur-md border border-white/10"
-                         th:classappend="${dailyStatus == 'normal'} ? ' bg-green-500/20 text-green-300' : ' bg-red-500/20 text-red-300'">
+                         th:classappend="${dailyStatus.isNormal()} ? ' bg-green-500/20 text-green-300' : ' bg-red-500/20 text-red-300'">
                         <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" th:classappend="${dailyStatus == 'normal'} ? 'bg-green-400' : 'bg-red-400'"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2" th:classappend="${dailyStatus == 'normal'} ? 'bg-green-500' : 'bg-red-500'"></span>
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" th:classappend="${dailyStatus.isNormal()} ? 'bg-green-400' : 'bg-red-400'"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2" th:classappend="${dailyStatus.isNormal()} ? 'bg-green-500' : 'bg-red-500'"></span>
                         </span>
-                        <span th:text="${dailyStatus != null ? dailyStatus : 'normal'}">normal</span>
+                        <span th:text="${dailyStatus?.label}">Normal</span>
                     </div>
                 </div>
             </div>
