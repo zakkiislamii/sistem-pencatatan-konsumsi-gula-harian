@@ -16,4 +16,5 @@ public class DailyConsumptionDetail {
     private List<SugarConsumption> consumptions;
     private BigDecimal dailyTotal;
     private ConsumptionStatus dailyStatus;
+    private boolean empty;
 }

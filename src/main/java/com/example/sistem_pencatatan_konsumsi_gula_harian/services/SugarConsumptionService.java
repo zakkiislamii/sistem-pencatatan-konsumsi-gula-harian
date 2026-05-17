@@ -85,6 +85,11 @@ public class SugarConsumptionService {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
         List<SugarConsumption> consumptions = repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(user, start, end);
+
+        if (consumptions.isEmpty()) {
+            return new DailyConsumptionDetail(consumptions, BigDecimal.ZERO, null, true); // ← tambah true
+        }
+
         BigDecimal dailyTotal = consumptions.stream()
                 .map(SugarConsumption::getAmount)
                 .filter(Objects::nonNull)
@@ -92,7 +97,7 @@ public class SugarConsumptionService {
         ConsumptionStatus dailyStatus = dailyTotal.compareTo(DAILY_LIMIT) <= 0
                 ? ConsumptionStatus.NORMAL
                 : ConsumptionStatus.MELEBIHI_BATAS;
-        return new DailyConsumptionDetail(consumptions, dailyTotal, dailyStatus);
+        return new DailyConsumptionDetail(consumptions, dailyTotal, dailyStatus, false);
     }
 
     @Transactional
