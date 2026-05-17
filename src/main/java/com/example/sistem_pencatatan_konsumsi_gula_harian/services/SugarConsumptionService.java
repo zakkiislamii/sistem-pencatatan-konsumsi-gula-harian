@@ -87,7 +87,7 @@ public class SugarConsumptionService {
         List<SugarConsumption> consumptions = repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(user, start, end);
 
         if (consumptions.isEmpty()) {
-            return new DailyConsumptionDetail(consumptions, BigDecimal.ZERO, null, true); // ← tambah true
+            return new DailyConsumptionDetail(consumptions, BigDecimal.ZERO, null, true);
         }
 
         BigDecimal dailyTotal = consumptions.stream()

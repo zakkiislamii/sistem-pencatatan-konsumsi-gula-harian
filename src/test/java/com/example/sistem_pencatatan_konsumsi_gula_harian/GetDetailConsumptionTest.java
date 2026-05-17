@@ -5,9 +5,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.eq;
@@ -53,9 +57,30 @@ public class GetDetailConsumptionTest {
         return sc;
     }
 
-    // TC1 - P1: total <= 50, status NORMAL
+    // P1: consumptions kosong → return early
     @Test
-    void getDetailConsumption_TC1_statusNormal() {
+    void getDetailConsumption_TC1_dataKosong() {
+        User user = makeUser();
+        LocalDate date = LocalDate.now();
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(LocalTime.MAX);
+
+        when(repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(
+                eq(user), eq(start), eq(end)))
+                .thenReturn(Collections.emptyList());
+
+        DailyConsumptionDetail result = service.getDetailConsumption(user, date);
+
+        assertNotNull(result);
+        assertEquals(BigDecimal.ZERO, result.getDailyTotal());
+        assertNull(result.getDailyStatus());   
+        assertEquals(0, result.getConsumptions().size());
+        assertTrue(result.isEmpty());          
+    }
+
+    // P2: total <= 50, status NORMAL
+    @Test
+    void getDetailConsumption_TC2_statusNormal() {
         User user = makeUser();
         LocalDate date = LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
@@ -74,11 +99,12 @@ public class GetDetailConsumptionTest {
         assertEquals(new BigDecimal("30"), result.getDailyTotal());
         assertEquals(ConsumptionStatus.NORMAL, result.getDailyStatus());
         assertEquals(2, result.getConsumptions().size());
+        assertFalse(result.isEmpty());          
     }
 
-    // TC2 - P2: total > 50, status MELEBIHI_BATAS
+    // P3: total > 50, status MELEBIHI_BATAS
     @Test
-    void getDetailConsumption_TC2_statusMelebihiBatas() {
+    void getDetailConsumption_TC3_statusMelebihiBatas() {
         User user = makeUser();
         LocalDate date = LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
@@ -97,5 +123,6 @@ public class GetDetailConsumptionTest {
         assertEquals(new BigDecimal("55"), result.getDailyTotal());
         assertEquals(ConsumptionStatus.MELEBIHI_BATAS, result.getDailyStatus());
         assertEquals(2, result.getConsumptions().size());
+        assertFalse(result.isEmpty());         
     }
 }
