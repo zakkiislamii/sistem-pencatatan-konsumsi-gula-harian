@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.DailyConsumptionDetail;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.SugarConsumptionForm;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.entities.SugarConsumption;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.entities.User;
@@ -18,6 +19,8 @@ import com.example.sistem_pencatatan_konsumsi_gula_harian.repositories.SugarCons
 @Service
 public class SugarConsumptionService {
 
+    private static final BigDecimal DAILY_LIMIT = new BigDecimal("50");
+
     private final SugarConsumptionRepository repository;
 
     public SugarConsumptionService(SugarConsumptionRepository repository) {
@@ -25,7 +28,7 @@ public class SugarConsumptionService {
     }
 
     @Transactional
-    public SugarConsumption saveConsumption(SugarConsumptionForm form, User user) {
+    public SugarConsumption addConsumption(SugarConsumptionForm form, User user) {
         validateForm(form);
 
         SugarConsumption sc = new SugarConsumption();
@@ -58,25 +61,24 @@ public class SugarConsumptionService {
         return repository.findByConsumptionIdAndUser(id, user);
     }
 
-    public List<SugarConsumption> getConsumptionsForDate(User user, LocalDate date) {
+    public DailyConsumptionDetail getDetailConsumption(User user, LocalDate date) {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
-        return repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(user, start, end);
-    }
-
-    public BigDecimal getTotalForDate(User user, LocalDate date) {
-        List<SugarConsumption> list = getConsumptionsForDate(user, date);
-        if (list == null || list.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
-        return list.stream()
+        List<SugarConsumption> consumptions = repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(user, start, end);
+        BigDecimal dailyTotal = consumptions.stream()
                 .map(SugarConsumption::getAmount)
                 .filter(a -> a != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String dailyStatus = dailyTotal.compareTo(DAILY_LIMIT) <= 0
+                ? "normal"
+                : "melebihi batas konsumsi";
+
+        return new DailyConsumptionDetail(consumptions, dailyTotal, dailyStatus);
     }
 
     @Transactional
-    public void deleteConsumptionForUser(Integer id, User user) {
+    public void deleteConsumption(Integer id, User user) {
         Optional<SugarConsumption> opt = repository.findByConsumptionIdAndUser(id, user);
         if (opt.isEmpty()) {
             throw new IllegalArgumentException("Data tidak ditemukan");

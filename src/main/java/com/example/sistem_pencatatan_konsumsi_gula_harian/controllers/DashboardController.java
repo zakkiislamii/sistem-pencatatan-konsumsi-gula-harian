@@ -1,6 +1,5 @@
 package com.example.sistem_pencatatan_konsumsi_gula_harian.controllers;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.DailyConsumptionDetail;
+import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.SugarConsumptionForm;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.entities.User;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.services.AuthService;
 import com.example.sistem_pencatatan_konsumsi_gula_harian.services.SugarConsumptionService;
@@ -44,24 +45,22 @@ public class DashboardController {
 
         if (authentication != null) {
             User user = authService.getUserByUsername(authentication.getName());
-            model.addAttribute("name", user != null ? user.getName() : "");
             if (user != null) {
-                model.addAttribute("consumptions", sugarConsumptionService.getConsumptionsForDate(user, date));
-                BigDecimal dailyTotal = sugarConsumptionService.getTotalForDate(user, date);
-                String dailyStatus = (dailyTotal.compareTo(new BigDecimal("50")) <= 0) ? "normal" : "melebihi batas konsumsi";
-                model.addAttribute("dailyTotal", dailyTotal);
-                model.addAttribute("dailyStatus", dailyStatus);
+                DailyConsumptionDetail detail = sugarConsumptionService.getDetailConsumption(user, date);
+                model.addAttribute("name", user.getName());
+                model.addAttribute("consumptions", detail.getConsumptions());
+                model.addAttribute("dailyTotal", detail.getDailyTotal());
+                model.addAttribute("dailyStatus", detail.getDailyStatus());
+            } else {
+                model.addAttribute("name", "");
             }
         } else {
             model.addAttribute("name", "");
         }
         model.addAttribute("selectedDate", date);
-        // max date untuk input tanggal
         model.addAttribute("maxDate", LocalDate.now().toString());
         model.addAttribute("maxDateTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
-        com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.SugarConsumptionForm form = new com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.SugarConsumptionForm();
-        form.setConsumedAt(LocalDateTime.now());
-        model.addAttribute("sugarForm", form);
+        model.addAttribute("sugarForm", new SugarConsumptionForm());
         return "dashboard";
     }
 }

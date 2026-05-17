@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.sistem_pencatatan_konsumsi_gula_harian.dtos.SugarConsumptionForm;
@@ -51,7 +50,7 @@ public class SugarConsumptionController {
 
         User user = authService.getUserByUsername(authentication.getName());
         try {
-            consumptionService.saveConsumption(form, user);
+            consumptionService.addConsumption(form, user);
             redirectAttributes.addFlashAttribute("success", "Data berhasil ditambahkan");
             String date = form.getConsumedAt().toLocalDate().toString();
             return "redirect:/dashboard?date=" + date;
@@ -116,20 +115,27 @@ public class SugarConsumptionController {
     }
 
     @PostMapping("/consumption/{id}/delete")
-    public ResponseEntity<?> deleteConsumption(
+    public String deleteConsumption(
             @PathVariable Integer id,
-            Authentication authentication) {
+            Authentication authentication,
+            @RequestParam(name = "date", required = false) String dateParam,
+            RedirectAttributes redirectAttributes) {
 
         if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return "redirect:/login";
         }
 
         User user = authService.getUserByUsername(authentication.getName());
         try {
-            consumptionService.deleteConsumptionForUser(id, user);
-            return ResponseEntity.ok().build();
+            consumptionService.deleteConsumption(id, user);
+            redirectAttributes.addFlashAttribute("success", "Data berhasil dihapus");
+            String redirectDate = (dateParam == null || dateParam.isBlank())
+                    ? LocalDateTime.now().toLocalDate().toString()
+                    : dateParam;
+            return "redirect:/dashboard?date=" + redirectDate;
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/dashboard";
         }
     }
 }

@@ -79,7 +79,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmModal = document.getElementById('confirm-delete-modal');
     const confirmCancelBtn = document.getElementById('confirm-delete-cancel');
     const confirmYesBtn = document.getElementById('confirm-delete-yes');
-    let pendingDelete = { id: null, li: null };
+    const deleteForm = document.getElementById('delete-consumption-form');
+    const deleteDateInput = document.getElementById('delete-consumption-date');
+    let pendingDelete = { id: null, date: null };
 
     function showConfirmModal() {
         if (!confirmModal) return;
@@ -98,75 +100,28 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!delEl) return;
         e.preventDefault();
         pendingDelete.id = delEl.getAttribute('data-id');
-        pendingDelete.li = delEl.closest('li');
+        pendingDelete.date = delEl.getAttribute('data-date') || '';
         showConfirmModal();
     });
 
     if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', function () {
         pendingDelete.id = null;
-        pendingDelete.li = null;
+        pendingDelete.date = null;
         hideConfirmModal();
     });
 
     if (confirmYesBtn) confirmYesBtn.addEventListener('click', function () {
         if (!pendingDelete.id) return;
-
-        const headerMeta = document.querySelector('meta[name="_csrf_header"]');
-        const tokenMeta = document.querySelector('meta[name="_csrf"]');
-        const headers = {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        };
-        if (headerMeta && tokenMeta) {
-            headers[headerMeta.getAttribute('content')] = tokenMeta.getAttribute('content');
+        if (deleteForm) {
+            deleteForm.action = '/consumption/' + pendingDelete.id + '/delete';
         }
-
-        let amount = 0;
-        if (pendingDelete.li) {
-            const amtSpan = pendingDelete.li.querySelector('.bg-green-50 span');
-            if (amtSpan) {
-                amount = parseFloat(amtSpan.textContent.replace(',', '.')) || 0;
-            }
+        if (deleteDateInput) {
+            deleteDateInput.value = pendingDelete.date || deleteDateInput.value || '';
         }
-
-        fetch('/consumption/' + pendingDelete.id + '/delete', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: headers
-        })
-        .then(resp => {
-            if (!resp.ok) throw resp;
-            if (pendingDelete.li && pendingDelete.li.parentNode) {
-                pendingDelete.li.parentNode.removeChild(pendingDelete.li);
-            }
-
-            const dailyTotalEl = document.getElementById('daily-total');
-            const statusEl = document.getElementById('daily-status');
-            let current = parseFloat(dailyTotalEl.textContent) || 0;
-            let newTotal = Math.max(0, current - amount);
-            dailyTotalEl.textContent = (Math.round(newTotal * 100) / 100).toString();
-
-            if (statusEl) {
-                const label = statusEl.querySelector('span');
-                if (newTotal <= 50) {
-                    statusEl.className = 'px-3 py-1 rounded-lg text-sm font-semibold bg-green-100 text-green-700';
-                    if (label) label.textContent = 'normal';
-                } else {
-                    statusEl.className = 'px-3 py-1 rounded-lg text-sm font-semibold bg-red-100 text-red-700';
-                    if (label) label.textContent = 'melebihi batas konsumsi';
-                }
-            }
-
-            pendingDelete.id = null;
-            pendingDelete.li = null;
-            hideConfirmModal();
-        })
-        .catch(err => {
-            console.error('Failed to delete', err);
-            alert('Gagal menghapus data');
-            pendingDelete.id = null;
-            pendingDelete.li = null;
-            hideConfirmModal();
-        });
+        pendingDelete.id = null;
+        pendingDelete.date = null;
+        if (deleteForm) {
+            deleteForm.submit();
+        }
     });
 });
