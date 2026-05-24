@@ -33,12 +33,14 @@ public class GetDetailConsumptionTest {
 
     private SugarConsumptionService service;
 
+    // Setup mock dan service sebelum tiap test dijalankan
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         service = new SugarConsumptionService(repository);
     }
 
+    // Helper untuk membuat dummy user
     private User makeUser() {
         User u = new User();
         u.setUserId(1);
@@ -47,6 +49,7 @@ public class GetDetailConsumptionTest {
         return u;
     }
 
+    // Helper untuk membuat dummy data konsumsi
     private SugarConsumption makeEntity(BigDecimal amount, User user) {
         SugarConsumption sc = new SugarConsumption();
         sc.setConsumptionId(1);
@@ -57,20 +60,22 @@ public class GetDetailConsumptionTest {
         return sc;
     }
 
-    // P1: consumptions kosong → return early
+    // P1: data konsumsi kosong -> return default value
     @Test
-    void getDetailConsumption_TC1_dataKosong() {
+    void getDetailConsumption_P1_dataKosong() {
         User user = makeUser();
         LocalDate date = LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
 
+        // Mock pencarian data -> hasil kosong
         when(repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(
                 eq(user), eq(start), eq(end)))
                 .thenReturn(Collections.emptyList());
 
         DailyConsumptionDetail result = service.getDetailConsumption(user, date);
 
+        // Validasi hasil
         assertNotNull(result);
         assertEquals(BigDecimal.ZERO, result.getDailyTotal());
         assertNull(result.getDailyStatus());   
@@ -78,9 +83,9 @@ public class GetDetailConsumptionTest {
         assertTrue(result.isEmpty());          
     }
 
-    // P2: total <= 50, status NORMAL
+    // P2: total <= 50 -> status NORMAL
     @Test
-    void getDetailConsumption_TC2_statusNormal() {
+    void getDetailConsumption_P2_statusNormal() {
         User user = makeUser();
         LocalDate date = LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
@@ -89,12 +94,14 @@ public class GetDetailConsumptionTest {
         SugarConsumption s1 = makeEntity(new BigDecimal("10"), user);
         SugarConsumption s2 = makeEntity(new BigDecimal("20"), user);
 
+        // Mock pencarian data -> data ditemukan
         when(repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(
                 eq(user), eq(start), eq(end)))
                 .thenReturn(Arrays.asList(s1, s2));
 
         DailyConsumptionDetail result = service.getDetailConsumption(user, date);
 
+        // Validasi hasil
         assertNotNull(result);
         assertEquals(new BigDecimal("30"), result.getDailyTotal());
         assertEquals(ConsumptionStatus.NORMAL, result.getDailyStatus());
@@ -102,9 +109,9 @@ public class GetDetailConsumptionTest {
         assertFalse(result.isEmpty());          
     }
 
-    // P3: total > 50, status MELEBIHI_BATAS
+    // P3: total > 50 -> status MELEBIHI_BATAS
     @Test
-    void getDetailConsumption_TC3_statusMelebihiBatas() {
+    void getDetailConsumption_P3_statusMelebihiBatas() {
         User user = makeUser();
         LocalDate date = LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
@@ -113,12 +120,14 @@ public class GetDetailConsumptionTest {
         SugarConsumption s1 = makeEntity(new BigDecimal("30"), user);
         SugarConsumption s2 = makeEntity(new BigDecimal("25"), user);
 
+        // Mock pencarian data -> data ditemukan
         when(repository.findByUserAndConsumedAtBetweenOrderByConsumedAtDesc(
                 eq(user), eq(start), eq(end)))
                 .thenReturn(Arrays.asList(s1, s2));
 
         DailyConsumptionDetail result = service.getDetailConsumption(user, date);
 
+        // Validasi hasil
         assertNotNull(result);
         assertEquals(new BigDecimal("55"), result.getDailyTotal());
         assertEquals(ConsumptionStatus.MELEBIHI_BATAS, result.getDailyStatus());

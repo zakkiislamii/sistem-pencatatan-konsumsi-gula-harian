@@ -27,12 +27,14 @@ public class AddConsumptionTest {
 
     private SugarConsumptionService service;
 
+    // Setup mock dan service sebelum tiap test dijalankan
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         service = new SugarConsumptionService(repository);
     }
 
+    // Helper untuk membuat dummy user
     private User makeUser() {
         User u = new User();
         u.setUserId(1);
@@ -41,6 +43,7 @@ public class AddConsumptionTest {
         return u;
     }
 
+    // Helper untuk membuat form input konsumsi
     private SugarConsumptionForm makeForm(BigDecimal amount, LocalDateTime consumedAt) {
         SugarConsumptionForm f = new SugarConsumptionForm();
         f.setAmount(amount);
@@ -49,9 +52,9 @@ public class AddConsumptionTest {
         return f;
     }
 
-    //P1: amount == null
+    // P1: amount null -> harus error
     @Test
-    void addConsumption_TC1_amountNull() {
+    void addConsumption_P1_amountNull() {
         User user = makeUser();
         SugarConsumptionForm form = makeForm(null, LocalDateTime.now().minusMinutes(1));
 
@@ -61,9 +64,9 @@ public class AddConsumptionTest {
         assertEquals("Jumlah konsumsi wajib diisi", ex.getMessage());
     }
 
-    //P2: amount < 0
+    // P2: amount negatif -> harus error
     @Test
-    void addConsumption_TC2_amountNegatif() {
+    void addConsumption_P2_amountNegatif() {
         User user = makeUser();
         SugarConsumptionForm form = makeForm(new BigDecimal("-1"), LocalDateTime.now().minusMinutes(1));
 
@@ -73,9 +76,9 @@ public class AddConsumptionTest {
         assertEquals("Jumlah harus >= 0", ex.getMessage());
     }
 
-    //P3: consumedAt == null
+    // P3: consumedAt null -> harus error
     @Test
-    void addConsumption_TC3_consumedAtNull() {
+    void addConsumption_P3_consumedAtNull() {
         User user = makeUser();
         SugarConsumptionForm form = makeForm(new BigDecimal("10"), null);
 
@@ -85,9 +88,9 @@ public class AddConsumptionTest {
         assertEquals("Tanggal dan waktu konsumsi wajib diisi", ex.getMessage());
     }
 
-    //P4: consumedAt masa depan
+    // P4: tanggal di masa depan -> harus error
     @Test
-    void addConsumption_TC4_consumedAtMasaDepan() {
+    void addConsumption_P4_consumedAtMasaDepan() {
         User user = makeUser();
         SugarConsumptionForm form = makeForm(new BigDecimal("10"), LocalDateTime.now().plusDays(1));
 
@@ -97,12 +100,13 @@ public class AddConsumptionTest {
         assertEquals("Tanggal tidak boleh di masa depan", ex.getMessage());
     }
 
-    //P5: semua valid, data tersimpan
+    // P5: input valid -> data berhasil disimpan
     @Test
-    void addConsumption_TC5_sukses() {
+    void addConsumption_P5_sukses() {
         User user = makeUser();
         SugarConsumptionForm form = makeForm(new BigDecimal("10"), LocalDateTime.now().minusMinutes(1));
 
+        // Mock save() -> simulasi database memberi ID setelah data disimpan
         when(repository.save(any(SugarConsumption.class))).thenAnswer(inv -> {
             SugarConsumption sc = inv.getArgument(0);
             sc.setConsumptionId(1);
@@ -111,10 +115,13 @@ public class AddConsumptionTest {
 
         SugarConsumption result = service.addConsumption(form, user);
 
+        // Validasi hasil
         assertNotNull(result);
         assertEquals(new BigDecimal("10"), result.getAmount());
         assertEquals(user, result.getUser());
         assertEquals("Test konsumsi", result.getDescription());
+
+        // Pastikan save() dipanggil
         verify(repository).save(any(SugarConsumption.class));
     }
 }
