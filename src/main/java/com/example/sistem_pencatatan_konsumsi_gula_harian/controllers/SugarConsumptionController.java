@@ -1,9 +1,5 @@
 package com.example.sistem_pencatatan_konsumsi_gula_harian.controllers;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -60,58 +56,6 @@ public class SugarConsumptionController {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/dashboard";
         }
-    }
-
-    @PostMapping("/consumption/{id}/edit")
-    public String editProcess(
-            @PathVariable Integer id,
-            @Valid @ModelAttribute("sugarForm") SugarConsumptionForm form,
-            BindingResult bindingResult,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes) {
-
-        if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Periksa kembali inputan kamu");
-            return "redirect:/dashboard";
-        }
-
-        User user = authService.getUserByUsername(authentication.getName());
-        try {
-            consumptionService.updateConsumption(id, form, user);
-            redirectAttributes.addFlashAttribute("success", "Data berhasil diperbarui");
-            String date = form.getConsumedAt().toLocalDate().toString();
-            return "redirect:/dashboard?date=" + date;
-        } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("error", ex.getMessage());
-            return "redirect:/dashboard";
-        }
-    }
-
-    @GetMapping("/consumption/{id}/fragment")
-    public String fragmentForEdit(
-            @PathVariable Integer id,
-            Authentication authentication,
-            Model model) {
-
-        if (authentication == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-
-        User user = authService.getUserByUsername(authentication.getName());
-        Optional<SugarConsumption> opt = consumptionService.findByIdForUser(id, user);
-        if (opt.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-        SugarConsumption sc = opt.get();
-        SugarConsumptionForm form = new SugarConsumptionForm(
-                sc.getConsumptionId(),
-                sc.getAmount(),
-                sc.getDescription(),
-                sc.getConsumedAt());
-        model.addAttribute("sugarForm", form);
-        model.addAttribute("maxDateTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
-        return "fragments/consumption-form-fragment :: consumptionForm";
     }
 
     @PostMapping("/consumption/{id}/delete")

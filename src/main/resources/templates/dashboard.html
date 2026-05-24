@@ -142,7 +142,6 @@
                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm border border-slate-100">
                     <span class="text-4xl">🍃</span>
                 </div>
-                <h4 class="font-serif text-2xl font-bold text-slate-800 mb-2">Piring masih bersih!</h4>
                 <p class="text-slate-500 font-medium">Kamu belum mencatat asupan gula apa pun untuk tanggal ini.</p>
             </div>
 
@@ -166,11 +165,6 @@
                     </div>
                     
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end  sm:group-hover:opacity-100 transition-opacity duration-300 mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-0 border-slate-100">
-                        <a href="#"
-                           th:attr="data-id=${c.consumptionId}"
-                           class="consumption-edit flex items-center justify-center p-2.5 bg-slate-50 hover:bg-slate-800 hover:text-white text-slate-600 rounded-xl border border-slate-200 hover:border-slate-800 transition-all" title="Edit Data">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </a>
                         <button type="button" th:attr="data-id=${c.consumptionId}, data-date=${selectedDate}" class="consumption-delete flex items-center justify-center p-2.5 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-xl border border-red-100 hover:border-red-600 transition-all" title="Hapus Data">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>

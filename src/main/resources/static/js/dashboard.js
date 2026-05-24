@@ -39,34 +39,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Tombol Edit (load fragment via AJAX)
-    document.addEventListener('click', function (e) {
-        const el = e.target.closest && e.target.closest('.consumption-edit');
-        if (!el) return;
-        e.preventDefault();
-
-        const id = el.getAttribute('data-id');
-        fetch('/consumption/' + id + '/fragment', {
-            credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(resp => {
-            if (!resp.ok) throw resp;
-            return resp.text();
-        })
-        .then(html => {
-            body.innerHTML = html;
-            attachCancelListener();
-            showModal();
-        })
-        .catch(err => {
-            console.error('Failed to load fragment', err);
-            window.location.href = '/consumption/' + id + '/edit';
-        });
-    });
 
     // Tutup modal klik overlay
     const overlay = document.getElementById('consumption-modal-overlay');

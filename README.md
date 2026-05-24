@@ -32,8 +32,7 @@ The controllers handle HTTP requests and prepare data for the Thymeleaf views.
   - Resolves the selected date, prevents future-date selection, and loads the authenticated user’s consumption summary.
   - Prepares the dashboard model with the daily total, consumption list, status, and form data.
 - `SugarConsumptionController`
-  - Handles add, edit, delete, and fragment loading for sugar-consumption entries.
-  - Returns Thymeleaf fragment content for the edit form.
+  - Handles add, delete, and fragment loading for sugar-consumption entries.
   - Uses flash attributes for success and error messages.
 
 ### 4. Service Layer
@@ -47,7 +46,7 @@ The service layer contains the business rules.
   - Implements `UserDetailsService` so Spring Security can load users during login.
   - Assigns `ROLE_USER` to authenticated users.
 - `SugarConsumptionService`
-  - Adds, updates, deletes, and queries sugar-consumption data.
+  - Adds, deletes, and queries sugar-consumption data.
   - Validates input values before saving.
   - Rejects negative amounts and future timestamps.
   - Aggregates consumption per day.

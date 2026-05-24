@@ -53,34 +53,6 @@ public class SugarConsumptionService {
         return repository.save(sc);
     }
 
-    @Transactional
-    public SugarConsumption updateConsumption(Integer id, SugarConsumptionForm form, User user) {
-        if (form.getAmount() == null) {
-            throw new IllegalArgumentException("Jumlah konsumsi wajib diisi");
-        }
-        if (form.getAmount().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Jumlah harus >= 0");
-        }
-        if (form.getConsumedAt() == null) {
-            throw new IllegalArgumentException("Tanggal dan waktu konsumsi wajib diisi");
-        }
-        if (form.getConsumedAt().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Tanggal tidak boleh di masa depan");
-        }
-
-        Optional<SugarConsumption> opt = repository.findByConsumptionIdAndUser(id, user);
-        if (opt.isEmpty()) {
-            throw new IllegalArgumentException("Data tidak ditemukan");
-        }
-
-        SugarConsumption sc = opt.get();
-        sc.setAmount(form.getAmount());
-        sc.setDescription(form.getDescription());
-        sc.setConsumedAt(form.getConsumedAt());
-
-        return repository.save(sc);
-    }
-
     public DailyConsumptionDetail getDetailConsumption(User user, LocalDate date) {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
